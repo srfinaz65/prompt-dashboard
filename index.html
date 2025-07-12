@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>AI Prompt Dashboard</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f9fafb;
+      margin: 0;
+      padding: 0;
+    }
+    .layout {
+      display: flex;
+      height: 100vh;
+    }
+    .sidebar, .saved-searches {
+      width: 20%;
+      padding: 20px;
+      background-color: #f3f4f6;
+      overflow-y: auto;
+    }
+    .main-content {
+      flex: 1;
+      padding: 30px;
+      background: #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-y: auto;
+    }
+    .ai-box {
+      width: 100%;
+      max-width: 700px;
+      margin-bottom: 40px;
+    }
+    .prompt-buttons {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .prompt-buttons button,
+    .submit-btn,
+    .save-btn,
+    .schedule-btn {
+      background-color: #e5e7eb;
+      color: #111827;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 14px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .submit-btn {
+      background-color: #4f46e5;
+      color: white;
+    }
+    .submit-btn:hover,
+    .save-btn:hover,
+    .schedule-btn:hover,
+    .prompt-buttons button:hover {
+      background-color: #d1d5db;
+    }
+    .ai-box input {
+      width: 100%;
+      padding: 12px 16px;
+      font-size: 16px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+    .llm-response {
+      background: #f3f4f6;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+    .recommended {
+      background-color: #ecfdf5;
+      border-left: 4px solid #10b981;
+      padding: 15px;
+      border-radius: 6px;
+      margin-top: 20px;
+    }
+    .history-entry, .search-entry {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      padding: 8px;
+      margin-bottom: 8px;
+      font-size: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .delete-btn {
+      background: none;
+      border: none;
+      color: #9ca3af;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .delete-btn:hover {
+      color: #ef4444;
+    }
+    .engine-section label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
+    h3 {
+      font-size: 16px;
+      color: #374151;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <!-- LEFT SIDEBAR -->
+    <div class="sidebar">
+      <h3>History</h3>
+      <div id="history-list"></div>
+      <h3 style="margin-top: 20px;">AI Models</h3>
+      <div class="engine-section">
+        <label><input type="checkbox" class="engine" value="openai" checked /> OpenAI GPT-4</label>
+        <label><input type="checkbox" class="engine" value="claude" /> Claude</label>
+        <label><input type="checkbox" class="engine" value="gemini" /> Gemini</label>
+        <label><input type="checkbox" class="engine" value="mistral" /> Mistral</label>
+      </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main-content">
+      <!-- AI PROMPT -->
+      <div class="ai-box">
+        <div class="prompt-buttons">
+          <button onclick="fillPrompt('Rewrite professionally:')">Writer</button>
+          <button onclick="fillPrompt('Make a bold LinkedIn post:')">LinkedIn</button>
+          <button onclick="fillPrompt('Summarize into 3 bullets:')">Summarize</button>
+          <button onclick="fillPrompt('Critique this:')">Critique</button>
+          <button onclick="fillPrompt('Turn into a step-by-step plan:')">Plan</button>
+        </div>
+
+        <input id="ai-prompt" placeholder="Ask me anything..." />
+        <button class="submit-btn" onclick="handleMultiEngine()">Send</button>
+        <button class="save-btn" onclick="saveSearch()">💾 Save</button>
+        <button class="schedule-btn" onclick="scheduleSearch()">📅 Schedule</button>
+
+        <div id="aiResponse"></div>
+      </div>
+      <!-- EXECUTIVE SUMMARY -->
+      <div class="ai-box">
+        <h3 style="font-size: 16px; color: #374151; margin-bottom: 15px;">📅 AI Daily Executive Summary</h3>
+        <div style="background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px;">
+          <div style="margin-bottom: 25px;">
+            <strong style="color: #111827;">📬 Key Emails to Review</strong>
+            <ul style="padding-left: 18px; margin-top: 8px;">
+              <li>Investor: "Revised Terms v3"</li>
+              <li>Client: "Renewal Approval Needed"</li>
+              <li>Ops: "Contract Update Required"</li>
+            </ul>
+          </div>
+          <div style="margin-bottom: 25px;">
+            <strong style="color: #111827;">🗂️ Today’s Tasks</strong>
+            <ul style="padding-left: 18px; margin-top: 8px;">
+              <li>Approve Q3 Financial Report</li>
+              <li>Prep Deck for Friday Pitch</li>
+              <li>Audit last month’s ad spend</li>
+            </ul>
+          </div>
+          <div style="background-color: #fee2e2; border-left: 4px solid #b91c1c; padding: 15px 18px; border-radius: 6px; color: #7f1d1d;">
+            <strong style="display: block; font-size: 15px;">🚨 High Priority</strong>
+            <ul style="margin-top: 8px; padding-left: 18px;">
+              <li>Close $480K contract by 2PM</li>
+              <li>11AM Legal Review w/ Outside Counsel</li>
+              <li>Approve acquisition summary to board</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT SIDEBAR -->
+    <div class="saved-searches">
+      <h3>Saved Searches</h3>
+      <div id="saved-list"></div>
+    </div>
+  </div>
+
+  <!-- SCRIPT -->
+  <script>
+    function fillPrompt(text) {
+      document.getElementById("ai-prompt").value = text;
+      document.getElementById("aiResponse").innerHTML = "";
+    }
+
+    function saveSearch() {
+      const prompt = document.getElementById("ai-prompt").value;
+      if (prompt.trim()) {
+        const container = document.getElementById("saved-list");
+        const entry = document.createElement("div");
+        entry.className = "search-entry";
+        entry.innerHTML = \`<span>\${prompt}</span><button class="delete-btn" onclick="this.parentElement.remove()">✖</button>\`;
+        container.appendChild(entry);
+      }
+    }
+
+    function scheduleSearch() {
+      alert("📅 Scheduling not wired up yet, Big Daddy!");
+    }
+
+    function appendHistory(prompt) {
+      const container = document.getElementById("history-list");
+      const entry = document.createElement("div");
+      entry.className = "history-entry";
+      entry.innerHTML = \`<span>\${prompt}</span><button class="delete-btn" onclick="this.parentElement.remove()">✖</button>\`;
+      container.prepend(entry);
+    }
+
+    async function handleMultiEngine() {
+      const prompt = document.getElementById("ai-prompt").value.trim();
+      const output = document.getElementById("aiResponse");
+      const engines = [...document.querySelectorAll(".engine:checked")].map(el => el.value);
+
+      if (!prompt || engines.length === 0) {
+        output.innerHTML = "⚠️ Enter a prompt and select at least one engine.";
+        return;
+      }
+
+      output.innerHTML = "⏳ Thinking...";
+      const results = [];
+
+      for (const engine of engines) {
+        if (engine === "openai") {
+          try {
+            const res = await fetch("https://openai-webflow-proxy-test.vercel.app/api/chat", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ prompt })
+            });
+            const data = await res.json();
+            results.push({ engine: "OpenAI GPT-4", text: data.result || "No response." });
+          } catch {
+            results.push({ engine: "OpenAI GPT-4", text: "⚠️ Error fetching response." });
+          }
+        } else {
+          results.push({ engine: engine.toUpperCase(), text: `🧪 [Mock response from ${engine.toUpperCase()}]: ${prompt}` });
+        }
+      }
+
+      output.innerHTML = results.map(r => \`
+        <div class="llm-response">
+          <strong>\${r.engine}</strong><br><br>\${r.text}
+        </div>
+      \`).join("");
+
+      const recommended = results.find(r =>
+        !r.text.includes("Error") && !r.text.includes("🔒")
+      ) || results[0];
+
+      if (recommended) {
+        output.innerHTML += \`
+          <div class="recommended">
+            <strong>✅ Recommended Response (from \${recommended.engine})</strong><br><br>
+            \${recommended.text}
+          </div>
+        \`;
+      }
+
+      appendHistory(prompt);
+    }
+  </script>
+</body>
+</html>
