@@ -10,16 +10,21 @@
       margin: 0;
       padding: 0;
     }
+
     .layout {
       display: flex;
       height: 100vh;
     }
+
     .sidebar, .saved-searches {
       width: 20%;
       padding: 20px;
       background-color: #f3f4f6;
       overflow-y: auto;
+      display: flex;
+      flex-direction: column;
     }
+
     .main-content {
       flex: 1;
       padding: 30px;
@@ -27,13 +32,13 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      overflow-y: auto;
     }
+
     .ai-box {
       width: 100%;
-      max-width: 700px;
-      margin-bottom: 40px;
+      max-width: 600px;
     }
+
     .prompt-buttons {
       display: flex;
       gap: 10px;
@@ -41,6 +46,7 @@
       flex-wrap: wrap;
       justify-content: center;
     }
+
     .prompt-buttons button,
     .submit-btn,
     .save-btn,
@@ -53,16 +59,19 @@
       font-size: 14px;
       cursor: pointer;
     }
+
     .submit-btn {
       background-color: #4f46e5;
       color: white;
     }
+
     .submit-btn:hover,
     .save-btn:hover,
     .schedule-btn:hover,
     .prompt-buttons button:hover {
       background-color: #d1d5db;
     }
+
     .ai-box input {
       width: 100%;
       padding: 12px 16px;
@@ -71,20 +80,16 @@
       border-radius: 8px;
       margin-bottom: 10px;
     }
-    .llm-response {
-      background: #f3f4f6;
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
-      padding: 15px;
-      margin-bottom: 20px;
-    }
-    .recommended {
-      background-color: #ecfdf5;
-      border-left: 4px solid #10b981;
-      padding: 15px;
-      border-radius: 6px;
+
+    #aiResponse {
       margin-top: 20px;
+      padding: 15px;
+      border-radius: 8px;
+      background: #f4f4f4;
+      border: 1px solid #ddd;
+      white-space: pre-wrap;
     }
+
     .history-entry, .search-entry {
       background: #fff;
       border: 1px solid #e5e7eb;
@@ -96,6 +101,7 @@
       justify-content: space-between;
       align-items: center;
     }
+
     .delete-btn {
       background: none;
       border: none;
@@ -103,14 +109,27 @@
       font-size: 14px;
       cursor: pointer;
     }
+
     .delete-btn:hover {
       color: #ef4444;
     }
+
     .engine-section label {
       display: block;
       margin-bottom: 6px;
       font-size: 14px;
     }
+
+    .show-more-btn {
+      background: none;
+      border: none;
+      color: #4b5563;
+      cursor: pointer;
+      font-size: 14px;
+      text-align: left;
+      padding: 0;
+    }
+
     h3 {
       font-size: 16px;
       color: #374151;
@@ -120,29 +139,37 @@
 </head>
 <body>
   <div class="layout">
-    <!-- LEFT SIDEBAR -->
+    <!-- Left Sidebar -->
     <div class="sidebar">
-      <h3>History</h3>
-      <div id="history-list"></div>
-      <h3 style="margin-top: 20px;">AI Models</h3>
+      <div>
+        <h3>History</h3>
+        <div id="history-list"></div>
+        <button class="show-more-btn" onclick="toggleHistory()">... show more</button>
+      </div>
       <div class="engine-section">
+        <h3>Select AI Models</h3>
         <label><input type="checkbox" class="engine" value="openai" checked /> OpenAI GPT-4</label>
         <label><input type="checkbox" class="engine" value="claude" /> Claude</label>
         <label><input type="checkbox" class="engine" value="gemini" /> Gemini</label>
         <label><input type="checkbox" class="engine" value="mistral" /> Mistral</label>
+        <label><input type="checkbox" class="engine" value="groq" /> Groq</label>
+        <label><input type="checkbox" class="engine" value="llama3" /> LLaMA 3</label>
+        <label><input type="checkbox" class="engine" value="cohere" /> Cohere</label>
+        <label><input type="checkbox" class="engine" value="perplexity" /> Perplexity</label>
+        <label><input type="checkbox" class="engine" value="chatglm" /> ChatGLM</label>
+        <label><input type="checkbox" class="engine" value="command-r" /> Command-R</label>
       </div>
     </div>
 
-    <!-- MAIN -->
+    <!-- Main Content -->
     <div class="main-content">
-      <!-- AI PROMPT -->
       <div class="ai-box">
         <div class="prompt-buttons">
-          <button onclick="fillPrompt('Rewrite professionally:')">Writer</button>
-          <button onclick="fillPrompt('Make a bold LinkedIn post:')">LinkedIn</button>
-          <button onclick="fillPrompt('Summarize into 3 bullets:')">Summarize</button>
-          <button onclick="fillPrompt('Critique this:')">Critique</button>
-          <button onclick="fillPrompt('Turn into a step-by-step plan:')">Plan</button>
+          <button onclick="fillPrompt(`Rewrite this professionally:`)">Writer</button>
+          <button onclick="fillPrompt(`Give me a bold LinkedIn post about leadership:`)">LinkedIn</button>
+          <button onclick="fillPrompt(`Summarize into 3 bullets:`)">Summarize</button>
+          <button onclick="fillPrompt(`Critique this idea:`)">Critique</button>
+          <button onclick="fillPrompt(`Make a step-by-step action plan:`)">Plan</button>
         </div>
 
         <input id="ai-prompt" placeholder="Ask me anything..." />
@@ -150,52 +177,23 @@
         <button class="save-btn" onclick="saveSearch()">💾 Save</button>
         <button class="schedule-btn" onclick="scheduleSearch()">📅 Schedule</button>
 
-        <div id="aiResponse"></div>
-      </div>
-      <!-- EXECUTIVE SUMMARY -->
-      <div class="ai-box">
-        <h3 style="font-size: 16px; color: #374151; margin-bottom: 15px;">📅 AI Daily Executive Summary</h3>
-        <div style="background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px;">
-          <div style="margin-bottom: 25px;">
-            <strong style="color: #111827;">📬 Key Emails to Review</strong>
-            <ul style="padding-left: 18px; margin-top: 8px;">
-              <li>Investor: "Revised Terms v3"</li>
-              <li>Client: "Renewal Approval Needed"</li>
-              <li>Ops: "Contract Update Required"</li>
-            </ul>
-          </div>
-          <div style="margin-bottom: 25px;">
-            <strong style="color: #111827;">🗂️ Today’s Tasks</strong>
-            <ul style="padding-left: 18px; margin-top: 8px;">
-              <li>Approve Q3 Financial Report</li>
-              <li>Prep Deck for Friday Pitch</li>
-              <li>Audit last month’s ad spend</li>
-            </ul>
-          </div>
-          <div style="background-color: #fee2e2; border-left: 4px solid #b91c1c; padding: 15px 18px; border-radius: 6px; color: #7f1d1d;">
-            <strong style="display: block; font-size: 15px;">🚨 High Priority</strong>
-            <ul style="margin-top: 8px; padding-left: 18px;">
-              <li>Close $480K contract by 2PM</li>
-              <li>11AM Legal Review w/ Outside Counsel</li>
-              <li>Approve acquisition summary to board</li>
-            </ul>
-          </div>
-        </div>
+        <div id="aiResponse">Waiting for input...</div>
       </div>
     </div>
 
-    <!-- RIGHT SIDEBAR -->
+    <!-- Right Sidebar -->
     <div class="saved-searches">
       <h3>Saved Searches</h3>
       <div id="saved-list"></div>
     </div>
   </div>
 
-  <!-- SCRIPT -->
   <script>
+    let historyEntries = [];
+
     function fillPrompt(text) {
       document.getElementById("ai-prompt").value = text;
-      document.getElementById("aiResponse").innerHTML = "";
+      document.getElementById("aiResponse").textContent = "Waiting for input...";
     }
 
     function saveSearch() {
@@ -204,37 +202,59 @@
         const container = document.getElementById("saved-list");
         const entry = document.createElement("div");
         entry.className = "search-entry";
-        entry.innerHTML = \`<span>\${prompt}</span><button class="delete-btn" onclick="this.parentElement.remove()">✖</button>\`;
+        entry.innerHTML = `<span>${prompt}</span><button class="delete-btn" onclick="this.parentElement.remove()">✖</button>`;
         container.appendChild(entry);
       }
     }
 
     function scheduleSearch() {
-      alert("📅 Scheduling not wired up yet, Big Daddy!");
+      alert("📅 Schedule functionality coming soon, Big Daddy!");
+    }
+
+    function deleteEntry(button, index) {
+      historyEntries.splice(index, 1);
+      renderHistory();
     }
 
     function appendHistory(prompt) {
+      historyEntries.unshift(prompt);
+      if (historyEntries.length > 50) historyEntries.pop();
+      renderHistory();
+    }
+
+    function renderHistory(showAll = false) {
       const container = document.getElementById("history-list");
-      const entry = document.createElement("div");
-      entry.className = "history-entry";
-      entry.innerHTML = \`<span>\${prompt}</span><button class="delete-btn" onclick="this.parentElement.remove()">✖</button>\`;
-      container.prepend(entry);
+      container.innerHTML = "";
+      const displayCount = showAll ? historyEntries.length : 5;
+      historyEntries.slice(0, displayCount).forEach((text, index) => {
+        const div = document.createElement("div");
+        div.className = "history-entry";
+        div.innerHTML = `<span>${text}</span><button class="delete-btn" onclick="deleteEntry(this, ${index})">✖</button>`;
+        container.appendChild(div);
+      });
+    }
+
+    let historyExpanded = false;
+    function toggleHistory() {
+      historyExpanded = !historyExpanded;
+      renderHistory(historyExpanded);
+      document.querySelector(".show-more-btn").textContent = historyExpanded ? "... show less" : "... show more";
     }
 
     async function handleMultiEngine() {
-      const prompt = document.getElementById("ai-prompt").value.trim();
+      const prompt = document.getElementById("ai-prompt").value;
       const output = document.getElementById("aiResponse");
-      const engines = [...document.querySelectorAll(".engine:checked")].map(el => el.value);
+      const selectedEngines = [...document.querySelectorAll(".engine:checked")].map(el => el.value);
 
-      if (!prompt || engines.length === 0) {
-        output.innerHTML = "⚠️ Enter a prompt and select at least one engine.";
+      if (!prompt || selectedEngines.length === 0) {
+        output.innerHTML = "⚠️ Please enter a prompt and select at least one engine.";
         return;
       }
 
-      output.innerHTML = "⏳ Thinking...";
+      output.innerHTML = "⏳ Processing...<br><br>";
       const results = [];
 
-      for (const engine of engines) {
+      for (const engine of selectedEngines) {
         if (engine === "openai") {
           try {
             const res = await fetch("https://openai-webflow-proxy-test.vercel.app/api/chat", {
@@ -244,35 +264,30 @@
             });
             const data = await res.json();
             results.push({ engine: "OpenAI GPT-4", text: data.result || "No response." });
-          } catch {
-            results.push({ engine: "OpenAI GPT-4", text: "⚠️ Error fetching response." });
+          } catch (err) {
+            results.push({ engine: "OpenAI GPT-4", text: "⚠️ Error." });
           }
         } else {
-          results.push({ engine: engine.toUpperCase(), text: `🧪 [Mock response from ${engine.toUpperCase()}]: ${prompt}` });
+          results.push({ engine: engine.toUpperCase(), text: `🔒 ${engine} API not connected.` });
         }
       }
 
-      output.innerHTML = results.map(r => \`
-        <div class="llm-response">
-          <strong>\${r.engine}</strong><br><br>\${r.text}
-        </div>
-      \`).join("");
+      output.innerHTML = results.map(r =>
+        `<div><strong>${r.engine}:</strong><br>${r.text}</div><br>`
+      ).join("");
 
       const recommended = results.find(r =>
-        !r.text.includes("Error") && !r.text.includes("🔒")
-      ) || results[0];
+        !r.text.includes("Error") && !r.text.includes("not connected")
+      );
 
       if (recommended) {
-        output.innerHTML += \`
-          <div class="recommended">
-            <strong>✅ Recommended Response (from \${recommended.engine})</strong><br><br>
-            \${recommended.text}
-          </div>
-        \`;
+        output.innerHTML += `<hr><strong>✅ Recommended (from ${recommended.engine}):</strong><br>${recommended.text}`;
       }
 
       appendHistory(prompt);
     }
+
+    renderHistory();
   </script>
 </body>
 </html>
